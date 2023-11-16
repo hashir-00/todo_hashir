@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import { firestore } from "../firebase";
+import { firestore } from "./constants/firebase";
 import {
   collection,
   QueryDocumentSnapshot,

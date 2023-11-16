@@ -4,7 +4,9 @@ import { useState } from "react";
 import styles from "../styles/Home.module.css";
 import { doc } from "@firebase/firestore"; // for creating a pointer to our Document
 import { setDoc } from "firebase/firestore"; // for adding the Document to Collection
-import { firestore } from "../firebase"; // firestore instance
+import { firestore } from "./constants/firebase"; // firestore instance
+
+
 const AddTodo: NextPage = () => {
   const [title, setTitle] = useState<string>(""); // title
   const [description, setDescription] = useState<string>(""); // description
@@ -55,7 +57,7 @@ const AddTodo: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Add todo</title>
+        <title >Add todo</title>
         <meta name="description" content="Next.js firebase todos app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -90,7 +92,7 @@ const AddTodo: NextPage = () => {
             />
           </div>
           <div className={styles.formGroup}>
-            <button type="submit" onClick={() => addTodo()}>Submit</button>
+            <button type="submit" onClick={addTodo}>Submit</button>
           </div>
         </form>
       </div>
