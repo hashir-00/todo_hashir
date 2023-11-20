@@ -14,12 +14,19 @@ import {
   Grid,
   ListItem,
   ListItemText,
+  Snackbar,
+  SnackbarOrigin,
   TextField,
 } from "@mui/material";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AlignHorizontalCenter } from "@mui/icons-material";
+
+
+import { useRouter } from 'next/router';
+import React from "react";
+
+interface State extends SnackbarOrigin {
+  open: boolean;
+}
+
 
 const AddTodo: NextPage = () => {
   const [title, setTitle] = useState<string>(""); // title
@@ -28,6 +35,7 @@ const AddTodo: NextPage = () => {
   const [error, setError] = useState<string>(""); // error
 
   const [message, setMessage] = useState<string>(""); // message
+  const router = useRouter();
 
   const addTodo = async () => {
     if (!title || !description) {
@@ -38,6 +46,7 @@ const AddTodo: NextPage = () => {
     const timestamp: string = Date.now().toString();
     // create a pointer to our Document
     const _todo = doc(firestore, `todos/${timestamp}`);
+  
     // structure the todo data
     const todoData = {
       title,
@@ -51,7 +60,13 @@ const AddTodo: NextPage = () => {
 
       //alert the message
       alert("Successfully Added");
+    
+  
+     
       //reset fields
+      
+      // Force refresh the page
+      router.reload();
      
     } catch (error) {
       //show an error message
@@ -62,8 +77,7 @@ const AddTodo: NextPage = () => {
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
      // avoid default behaviour
-     setTitle("");
-     setDescription("");
+     
   };
 
   return (
@@ -113,8 +127,12 @@ const AddTodo: NextPage = () => {
           justifyContent: "center", 
           gap:3}}>
           <Button variant="contained" onClick={addTodo}>
-            Submit
+            Submit 
           </Button>
+
+          
+          
+      
 
           <a href="/">
             <Button
@@ -128,10 +146,12 @@ const AddTodo: NextPage = () => {
               Return Home{" "}
             </Button>{" "}
           </a>
-        </Box>
+        </Box>/
+      
       </form>
     </Container>
   );
 };
+
 
 export default AddTodo;

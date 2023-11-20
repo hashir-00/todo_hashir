@@ -40,11 +40,8 @@ import {
 import * as React from "react";
 
 import DeleteIcon from "@mui/icons-material/Delete";
-import { timeStamp } from "console";
-import moment from "moment";
-import { text } from "stream/consumers";
-import { get } from "http";
-
+import { useRouter } from "next/router";
+ 
 //mui
 
 const Items = styled(Paper)(({ theme }) => ({
@@ -90,9 +87,10 @@ interface State extends SnackbarOrigin {
 const Home: NextPage = () => {
   const todosCollection = collection(firestore, "todos");
   const [todos, setTodos] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
-  const [ctodos, completed] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
+  
   const [loading, setLoading] = useState<boolean>(true);
-  const [message,setMessage] = useState<string>("");// message
+ 
+  const router = useRouter();
 
   //mui buttons
   
@@ -102,41 +100,22 @@ const Home: NextPage = () => {
     // get the todos
 
     getTodos();
+    
 
     
     // reset loading
     setTimeout(() => {
       setLoading(false);
     }, 2000);
+    
   }, []);
 
-  const getTodosCompleted = async () => {
-    
-    
-    
-    // construct a query to get up to 10 undone todos
-    const todosQuery = query(
-      todosCollection,
-      where("done", "==", true),
-      limit(10)
-    );
-    // get the todos
-    const querySnapshot = await getDocs(todosQuery);
-
-    // map through todos adding them to an array
-    const result: QueryDocumentSnapshot<DocumentData>[] = [];
-    querySnapshot.forEach((snapshot) => {
-      result.push(snapshot);
-    });
-  
-    // set it to state
-    setTodos(result);
-  };
 
 
 
   const getTodos = async () => {
     // construct a query to get up to 10 undone todos
+    
     const todosQuery = query(
       todosCollection,
       where("done", "==", false),
@@ -152,24 +131,32 @@ const Home: NextPage = () => {
     });
     // set it to state
     setTodos(result);
+  
+    
   };
 
   const updateTodo = async (documentId: string) => {
+    
     // create a pointer to the Document id
     const _todo = doc(firestore, `todos/${documentId}`);
     // update the doc by setting done to true
-    updateDoc(_todo, {
+   await updateDoc(_todo, {
       done:true,
     });
-   
+
+
     getTodos();
    
     // retrieve todos
    
    
    //update alert
-  alert("Successfully Updated");
-  };
+   
+  alert("Successfully Updated")  ; 
+
+  router.reload();
+  }
+  ;
 
   const deleteTodo = async (documentId: string) => {
     // create a pointer to the Document id
@@ -181,6 +168,7 @@ const Home: NextPage = () => {
     getTodos();
     //delete alert
    alert("Successfully Deleted");
+   
   };
 
   return (
