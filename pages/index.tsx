@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { firestore, todosCollection } from "./constants/firebase";
+import { firestore, todosCollection } from "./utils/firebase";
 import {
   collection,
   QueryDocumentSnapshot,
@@ -12,7 +12,7 @@ import {
 } from "@firebase/firestore";
 import { useEffect, useState } from "react";
 import { updateDoc } from "@firebase/firestore";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, orderBy, serverTimestamp, setDoc } from "firebase/firestore";
 import { deleteDoc } from "@firebase/firestore";
 
 import {
@@ -36,7 +36,8 @@ import * as React from "react";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DeleteIcon from "@mui/icons-material/Delete";
 import router, { Router, useRouter } from "next/router";
-
+import { DATABASES } from "./constants/databases";
+import { todo } from "node:test";
 
 //mui
 
@@ -70,10 +71,14 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 const Home: NextPage = () => {
   const [todos, setTodos] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
   const [did, setDid] = useState<boolean>(false); //edit state
+  const [title, setTitle] = useState<string>(""); // title
+  const [description, setDescription] = useState<string>(""); // description
+  const [todoID, setTodoID] = useState<string>(""); // todoID
 
+  const [colorType, setColorType] = useState<"error" | "success">(); // error
   const [msg, setMsg] = useState<string>(""); // error
   const [loading, setLoading] = useState<boolean>(true);
-
+  const [error, setError] = useState<string>(""); // error
   //alert
   const [open, setOpen] = React.useState(false);
 
@@ -99,29 +104,53 @@ const Home: NextPage = () => {
     }, 2000);
   }, []);
 
-  const getTodos = async () => {
-    // construct a query to get up to 10 undone todos
+  //update todo
+  const editTodo = async (documentId:string) => {
 
-    const todosQuery = query(
-      todosCollection,
-      where("done", "==", false),
-      
-    );
+    
+     
+        const _todo = doc(firestore, `${DATABASES.TODO}/${documentId}`);
+    // update the doc by setting done to true
+    updateDoc(_todo, {
+   title: title,
+    description: description
+    
+    });
+    setColorType("success");
+    setMsg("Todo Updated");
+
+    setOpen(true);
+    setDid(false);
+
+    await getTodos();
+    setTitle("");
+    setDescription("");
+    };
+  
+   
+
+
+  const getTodos = async () => {
+    // construct a query to get the undone todos
+
+    const todosQuery = query(todosCollection, where("done", "==", false), );
     // get the todos
     const querySnapshot = await getDocs(todosQuery);
+    
 
     // map through todos adding them to an array
     const result: QueryDocumentSnapshot<DocumentData>[] = [];
     querySnapshot.forEach((snapshot) => {
       result.push(snapshot);
     });
+    
     // set it to state
-    await setTodos(result);
+    setTodos(result);
   };
 
   const updateTodo = async (documentId: string) => {
     // create a pointer to the Document id
-    const _todo = doc(firestore, `todos/${documentId}`);
+    const _todo = doc(firestore, `${DATABASES.TODO}/${documentId}`);
     // update the doc by setting done to true
     await updateDoc(_todo, {
       done: true,
@@ -130,14 +159,11 @@ const Home: NextPage = () => {
     setOpen(true);
     await getTodos();
 
-    // retrieve todos
-
-    //update alert
+ 
   };
   const deleteTodo = async (documentId: string) => {
     // create a pointer to the Document id
-    const _todo = doc(firestore, `todos/${documentId}`);
-    // delete the doc
+    const _todo = doc(firestore, `${DATABASES.TODO}/${documentId}`); // delete the doc
     await deleteDoc(_todo);
     setOpen(true);
     setMsg("Todo deleted");
@@ -147,8 +173,8 @@ const Home: NextPage = () => {
   };
 
   return (
-    <Container sx={{ minHeight: "100vh", background: "" }}>
-      <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
+    <Container sx={{ minHeight: "100vh" }}>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
           {msg}
         </Alert>
@@ -166,7 +192,7 @@ const Home: NextPage = () => {
           boxShadow: 4,
           borderRadius: 5,
           paddingTop: "1%",
-          
+
           width: "50%",
           margin: "auto", // Center the container horizontally
           marginTop: "5%", // Add margin top for the vertical spacing
@@ -183,34 +209,52 @@ const Home: NextPage = () => {
             TODOS
           </Typography>
 
-            <Button
-              sx={{ borderRadius: 3 }}
-              variant="contained"
-              endIcon={<PlusIcon sx={{ color: "black" }} />}
-              onClick={() => {router.push("/addTodo")}}
-           >
-              Here
-            </Button>
-        
+          <Button
+            sx={{ borderRadius: 3 }}
+            variant="contained"
+            endIcon={<PlusIcon sx={{ color: "black" }} />}
+            onClick={() => {
+              router.push("/addTodo");
+            }}
+          >
+            Here
+          </Button>
         </Stack>
         <Typography mt="10px" variant="subtitle2" gutterBottom color={"red"}>
           Todos Remaining {todos.length}
         </Typography>
       </Box>
       {did && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: "5%",
-          }}
-        >
-          <TextField label="title"></TextField>
-          <TextField label="description"></TextField>
-          <Button variant="contained"> Update</Button>
-        </Box>
-      )}
+              <Stack
+                direction="column"
+                spacing={1}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: "5%",
+                }}
+              >
+                <TextField
+                  label="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                ></TextField>
+                <TextField
+                  label="description"
+                  value={description} onChange={(e) => setDescription(e.target.value)}
+                 
+                ></TextField>
+                <Button variant="contained" onClick={() =>editTodo(todoID) }>
+               
+                  Update
+                </Button>
+                <Button variant="contained" color="secondary" onClick={() =>setDid(false) }>
+               
+                  cancel
+                </Button>
+              </Stack>
+            )}
 
       <Box
         sx={{
@@ -227,11 +271,12 @@ const Home: NextPage = () => {
               p: 1,
             }}
           >
-            {" "}
+       
             <LoadingButton loading size="large"></LoadingButton>
           </Box>
         ) : (
           todos.map((todo) => {
+            
             return (
               <Box
                 sx={{
@@ -271,7 +316,7 @@ const Home: NextPage = () => {
                       variant="contained"
                       color="success"
                       onClick={() => {
-                        setDid(true);
+                        setDid(true) , setTodoID(todo.id);
                       }}
                     >
                       Edit
@@ -279,7 +324,9 @@ const Home: NextPage = () => {
                   </Stack>
                 </ListItem>
               </Box>
+              
             );
+            
           })
         )}
       </Box>
