@@ -1,9 +1,8 @@
-
 import Head from "next/head";
 import { useState } from "react";
 
-import { setDoc } from "firebase/firestore"; // for adding the Document to Collection
-import { _todo } from "./constants/firebase"; // firestore instance
+import { doc, serverTimestamp, setDoc } from "firebase/firestore"; // for adding the Document to Collection
+import { firestore } from "./utils/firebase"; // firestore instance
 import SvgIcon from "@mui/material/SvgIcon";
 import {
   Alert,
@@ -17,7 +16,9 @@ import {
 } from "@mui/material";
 
 import React from "react";
-import router from "next/router";
+import Link from "next/link";
+import router, { Router } from "next/router";
+import { DATABASES } from "./constants/databases";
 
 const AddTodo = () => {
   const [title, setTitle] = useState<string>(""); // title
@@ -25,7 +26,7 @@ const AddTodo = () => {
 
   const [Msg, setMsg] = useState<string>(""); // error
   const [error, setError] = useState<string>(""); // error
-  const [state, setState] = useState<string>(""); // error
+  const [colorType, setColorType] = useState<"error" | "success">(); // error
 
   //alert
   const [open, setOpen] = React.useState(false);
@@ -43,22 +44,25 @@ const AddTodo = () => {
     }
 
     setOpen(false);
-    router.reload();
   };
 
   const addTodo = async () => {
     if (!title || !description) {
       // check for any null value
 
-      return setOpen(true), setMsg("Please fill all fields"), setState("error");
+      return (
+        setOpen(true), setMsg("Please fill all fields"), setColorType("error")
+      );
     }
     // get the current timestamp
-
+    const timestamp:string = Date.now().toString();
+    const _todo = doc(firestore, `${DATABASES.TODO}/${timestamp}`);
     // structure the todo data
     const todoData = {
       title,
       description,
       done: false,
+      timeStamps: serverTimestamp(),
     };
     try {
       //add the Document
@@ -67,13 +71,11 @@ const AddTodo = () => {
       // Set success to trigger the useEffect
 
       setMsg("Todo added successfully");
-      setState("success");
+      setColorType("success");
 
       setOpen(true);
-
-      // reset the form
-
-      //alert the message
+      setTitle("");
+      setDescription("");
     } catch (error) {
       //show an error message
       setError("An error occurred while adding todo");
@@ -87,8 +89,13 @@ const AddTodo = () => {
 
   return (
     <Container>
+      
       <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity={state} sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleClose}
+          severity={colorType}
+          sx={{ width: "100%" }}
+        >
           {Msg}
         </Alert>
       </Snackbar>
@@ -97,7 +104,7 @@ const AddTodo = () => {
         <meta name="description" content="" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      
       <Box
         sx={{
           display: "flex",
@@ -120,6 +127,7 @@ const AddTodo = () => {
               label="Title"
               variant="outlined"
               onChange={(e) => setTitle(e.target.value)}
+              value={title}
             />
           </ListItem>
           <ListItem>
@@ -130,6 +138,7 @@ const AddTodo = () => {
               label="description"
               variant="outlined"
               onChange={(e) => setDescription(e.target.value)}
+              value={description}
             />
           </ListItem>
           <Box
@@ -145,19 +154,19 @@ const AddTodo = () => {
               Submit
             </Button>
 
-            
-              <Button
-                variant="contained"
-                onClick={() => {router.push("/")}}
-                startIcon={
-                  <SvgIcon>
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                  </SvgIcon>
-                }
-              >
-                Return Home{" "}
-              </Button>
-           
+            <Button
+              variant="contained"
+              onClick={() => {
+                router.push("/");
+              }}
+              startIcon={
+                <SvgIcon>
+                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </SvgIcon>
+              }
+            >
+              Return Home{" "}
+            </Button>
           </Box>
         </form>
       </Box>
