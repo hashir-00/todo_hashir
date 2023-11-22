@@ -1,8 +1,6 @@
 import type { NextPage } from "next";
-import Head from "next/head";
-import LoadingButton from '@mui/lab/LoadingButton';
-import styles from "../styles/Home.module.css";
-import { firestore } from "./constants/firebase";
+import LoadingButton from "@mui/lab/LoadingButton";
+import { firestore, todosCollection } from "./constants/firebase";
 import {
   collection,
   QueryDocumentSnapshot,
@@ -14,51 +12,33 @@ import {
 } from "@firebase/firestore";
 import { useEffect, useState } from "react";
 import { updateDoc } from "@firebase/firestore";
-import { doc, orderBy } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { deleteDoc } from "@firebase/firestore";
 
-import { setDoc } from "firebase/firestore"; // for adding the Document to Collection
-
-
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
   Container,
-  Grid,
-  Icon,
+  Link,
   ListItem,
   ListItemText,
   Paper,
+  Snackbar,
   SnackbarOrigin,
   Stack,
-  ThemeProvider,
+  TextField,
+  Typography,
   createSvgIcon,
   styled,
 } from "@mui/material";
 import * as React from "react";
-
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useRouter } from "next/router";
- 
+import router, { Router, useRouter } from "next/router";
+
+
 //mui
-
-const Items = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(2),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
 
 const PlusIcon = createSvgIcon(
   // credit: plus icon from https://heroicons.com/
@@ -77,49 +57,55 @@ const PlusIcon = createSvgIcon(
   </svg>,
   "Plus"
 );
-interface State extends SnackbarOrigin {
-  open: boolean;
-}
 
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 //home
 
 const Home: NextPage = () => {
-  const todosCollection = collection(firestore, "todos");
   const [todos, setTodos] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
-  
+  const [did, setDid] = useState<boolean>(false); //edit state
+
+  const [msg, setMsg] = useState<string>(""); // error
   const [loading, setLoading] = useState<boolean>(true);
- 
-  const router = useRouter();
 
-  //mui buttons
-  
+  //alert
+  const [open, setOpen] = React.useState(false);
 
- 
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
+  };
+
   useEffect(() => {
     // get the todos
 
     getTodos();
-    
 
-    
     // reset loading
     setTimeout(() => {
       setLoading(false);
     }, 2000);
-    
   }, []);
-
-
-
 
   const getTodos = async () => {
     // construct a query to get up to 10 undone todos
-    
+
     const todosQuery = query(
       todosCollection,
       where("done", "==", false),
-      limit(10)
+      
     );
     // get the todos
     const querySnapshot = await getDocs(todosQuery);
@@ -130,50 +116,43 @@ const Home: NextPage = () => {
       result.push(snapshot);
     });
     // set it to state
-    setTodos(result);
-  
-    
+    await setTodos(result);
   };
 
   const updateTodo = async (documentId: string) => {
-    
     // create a pointer to the Document id
     const _todo = doc(firestore, `todos/${documentId}`);
     // update the doc by setting done to true
-   await updateDoc(_todo, {
-      done:true,
+    await updateDoc(_todo, {
+      done: true,
     });
+    setMsg("Todo marked as done");
+    setOpen(true);
+    await getTodos();
 
-
-    getTodos();
-   
     // retrieve todos
-   
-   
-   //update alert
-   
-  alert("Successfully Updated")  ; 
 
-  router.reload();
-  }
-  ;
-
+    //update alert
+  };
   const deleteTodo = async (documentId: string) => {
     // create a pointer to the Document id
     const _todo = doc(firestore, `todos/${documentId}`);
     // delete the doc
     await deleteDoc(_todo);
-
+    setOpen(true);
+    setMsg("Todo deleted");
     // retrieve todos
-    getTodos();
+    await getTodos();
     //delete alert
-   alert("Successfully Deleted");
-   
   };
 
   return (
-    
-    <Container sx={{  minHeight:"100vh",background: "" }}>
+    <Container sx={{ minHeight: "100vh", background: "" }}>
+      <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
+          {msg}
+        </Alert>
+      </Snackbar>
       <title>Todos app</title>
 
       <Box
@@ -184,26 +163,55 @@ const Home: NextPage = () => {
           justifyContent: "center",
 
           bgcolor: "background.paper",
-          boxShadow: 1,
-          borderRadius: 2,
-          p: 2,
-          maxWidth: "30%",
+          boxShadow: 4,
+          borderRadius: 5,
+          paddingTop: "1%",
+          
+          width: "50%",
           margin: "auto", // Center the container horizontally
           marginTop: "5%", // Add margin top for the vertical spacing
         }}
       >
-        <Stack marginTop="2" direction="column" spacing={1}>
-          <h2 id="add-todo">Add your Todos</h2>{" "}
-          
-          <a href="/add-todo">
-            <Button variant="contained" endIcon={<PlusIcon />}>
+        <Stack direction="row" spacing={1}>
+          <Typography variant="h6" gutterBottom>
+            ADD
+          </Typography>
+          <Typography variant="h6" gutterBottom>
+            YOUR
+          </Typography>
+          <Typography variant="h6" gutterBottom>
+            TODOS
+          </Typography>
+
+            <Button
+              sx={{ borderRadius: 3 }}
+              variant="contained"
+              endIcon={<PlusIcon sx={{ color: "black" }} />}
+              onClick={() => {router.push("/addTodo")}}
+           >
               Here
             </Button>
-          </a>
-          <h6><b>Todos Remaining {todos.length}</b></h6>
+        
         </Stack>
+        <Typography mt="10px" variant="subtitle2" gutterBottom color={"red"}>
+          Todos Remaining {todos.length}
+        </Typography>
       </Box>
-      
+      {did && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: "5%",
+          }}
+        >
+          <TextField label="title"></TextField>
+          <TextField label="description"></TextField>
+          <Button variant="contained"> Update</Button>
+        </Box>
+      )}
+
       <Box
         sx={{
           alignItems: "center",
@@ -215,68 +223,80 @@ const Home: NextPage = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-           
-           
 
               p: 1,
             }}
           >
             {" "}
-            <LoadingButton loading size="large" >
-        
-            </LoadingButton>
+            <LoadingButton loading size="large"></LoadingButton>
           </Box>
         ) : (
-          todos.map((todo, index) => {
+          todos.map((todo) => {
             return (
-              <Box     sx={{display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom:"1%",
-          }}  key={index}>
-            
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "1%",
+                }}
+                key={todo.id}
+              >
                 {" "}
                 <ListItem
-                  sx={{ mt: 5, boxShadow: 5 }}
-                  style={{ backgroundColor: "ash", width: "50%" }}
+                  sx={{
+                    mt: 3,
+                    boxShadow: 5,
+                    borderRadius: 3,
+                    backgroundColor: "ash",
+                    width: "50%",
+                  }}
                 >
-                  
                   {" "}
                   <Checkbox onClick={() => updateTodo(todo.id)}></Checkbox>
-                
                   <ListItemText
                     primary={todo.data().title}
                     secondary={todo.data().description}
                   ></ListItemText>
-                  
-                  <Button
-                    variant="contained"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => deleteTodo(todo.id)}
-                  >
-                    Delete
-                  </Button>
-
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => deleteTodo(todo.id)}
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => {
+                        setDid(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Stack>
                 </ListItem>
               </Box>
             );
           })
         )}
       </Box>
-      
+
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-         
+
           bottom: 0,
           left: 0,
           right: 0,
-          position:'fixed',
-       
+          position: "fixed",
+
           borderRadius: 2,
-          
+
           p: 2,
         }}
       >
@@ -286,8 +306,6 @@ const Home: NextPage = () => {
           </a>
         </footer>
       </Box>
-      
-   
     </Container>
   );
 };
