@@ -9,6 +9,7 @@ import {
   Box,
   Button,
   Container,
+  Grid,
   ListItem,
   Snackbar,
   TextField,
@@ -19,6 +20,7 @@ import React from "react";
 import Link from "next/link";
 import router, { Router } from "next/router";
 import { DATABASES } from "./constants/databases";
+import { TextareaAutosize } from "@/styles/style";
 
 const AddTodo = () => {
   const [title, setTitle] = useState<string>(""); // title
@@ -55,7 +57,7 @@ const AddTodo = () => {
       );
     }
     // get the current timestamp
-    const timestamp:string = Date.now().toString();
+    const timestamp: string = Date.now().toString();
     const _todo = doc(firestore, `${DATABASES.TODO}/${timestamp}`);
     // structure the todo data
     const todoData = {
@@ -89,7 +91,6 @@ const AddTodo = () => {
 
   return (
     <Container>
-      
       <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
         <Alert
           onClose={handleClose}
@@ -104,70 +105,81 @@ const AddTodo = () => {
         <meta name="description" content="" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Typography variant="h4" gutterBottom>
-          ADD YOUR TODOS
-        </Typography>
-      </Box>
+
       <Box>
         <form onSubmit={handleSubmit}>
-          <ListItem>
-            <TextField
-              sx={{ mt: 1 }}
-              fullWidth
-              id="outlined-basic"
-              label="Title"
-              variant="outlined"
-              onChange={(e) => setTitle(e.target.value)}
-              value={title}
-            />
-          </ListItem>
-          <ListItem>
-            <TextField
-              sx={{ mt: 1 }}
-              fullWidth
-              id="outlined-basic"
-              label="description"
-              variant="outlined"
-              onChange={(e) => setDescription(e.target.value)}
-              value={description}
-            />
-          </ListItem>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 3,
-            }}
+          <Grid
+            container
+            display="flex"
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            sx={{ minHeight: "90vh" }}
           >
-            <Button variant="contained" onClick={addTodo}>
-              Submit
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={() => {
-                router.push("/");
+            <Box
+              width={500}
+              sx={{
+                boxShadow: 5,
+                bgcolor: "snow",
+                borderRadius: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-              startIcon={
-                <SvgIcon>
-                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </SvgIcon>
-              }
             >
-              Return Home{" "}
-            </Button>
-          </Box>
+              <Typography p={1} paddingBottom={0} variant="h4" gutterBottom>
+                ADD YOUR TODOS
+              </Typography>
+            </Box>
+            <Grid item sm={6} md={8}>
+              <ListItem>
+                <TextField
+                  sx={{ mt: 1 }}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Title"
+                  variant="outlined"
+                  onChange={(e) => setTitle(e.target.value)}
+                  value={title}
+                />
+              </ListItem>
+            </Grid>
+            <Grid item sm={6} md={8}>
+              <ListItem>
+                <TextareaAutosize
+                  id="outlined-basic"
+                  aria-label="description"
+                  placeholder="Description"
+                  minRows={3}
+                  onChange={(e) => setDescription(e.target.value)}
+                  value={description}
+                ></TextareaAutosize>
+              </ListItem>
+            </Grid>
+            <Grid item sm={6} md={8}>
+              <Button variant="contained" onClick={addTodo}>
+                Submit
+              </Button>
+            </Grid>
+            <Grid item sm={6} md={8} mt={1}>
+              {" "}
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  router.push("/");
+                }}
+                startIcon={
+                  <SvgIcon>
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                  </SvgIcon>
+                }
+              >
+                Return Home
+              </Button>
+            </Grid>
+          </Grid>
         </form>
       </Box>
     </Container>
