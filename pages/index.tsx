@@ -226,7 +226,7 @@ const Home: NextPage = () => {
     const _todo = doc(firestore, `${DATABASES.TODO}/${documentId}`); // delete the doc
     await deleteDoc(_todo);
     setOpen(true);
-    setMsg("Todo deleted");
+    setMsg("Completed Todo deleted");
     // retrieve todos
     await getCompletedTodos();
    
