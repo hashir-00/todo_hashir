@@ -1,10 +1,12 @@
+"use client";
+
 import Head from "next/head";
 import { useState } from "react";
 import HomeIcon from "@mui/icons-material/Home";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"; // for adding the Document to Collection
-import { firestore } from "./utils/firebase"; // firestore instance
+import { firestore } from "../utils/firebase"; // firestore instance
 import SvgIcon from "@mui/material/SvgIcon";
-import { Alert, TextareaAutosize } from "../styles/style";
+import { Alert, TextareaAutosize } from "../../styles/style";
 import {
   Box,
   Button,
@@ -18,10 +20,11 @@ import {
 
 import React from "react";
 import Link from "next/link";
-import router, { Router } from "next/router";
-import { DATABASES } from "./constants/databases";
+import { DATABASES } from "../constants/databases";
+import { useRouter } from "next/navigation";
 
 const AddTodo = () => {
+  const router = useRouter();
   const [title, setTitle] = useState<string>(""); // title
   const [description, setDescription] = useState<string>(""); // description
 
