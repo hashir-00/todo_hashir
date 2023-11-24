@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LoadingButton from "@mui/lab/LoadingButton";
 import { firestore, todosCollection } from "./utils/firebase";
 import {
@@ -19,6 +20,8 @@ import {
   Checkbox,
   Container,
   Grid,
+  Icon,
+  Link,
   ListItem,
   ListItemText,
   Snackbar,
@@ -59,7 +62,7 @@ const Home: NextPage = () => {
     getTodos();
     getCompletedTodos();
 
-    // reset loading
+    // reset loading and for loading effect
     setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -273,7 +276,7 @@ const Home: NextPage = () => {
           <Button
             sx={{ borderRadius: 3 }}
             variant="contained"
-            endIcon={<PlusIcon sx={{ color: "black" }} />}
+            endIcon={<AddCircleIcon color="action"/>}
             onClick={() => {
               router.push("/addTodo");
             }}
@@ -542,9 +545,9 @@ const Home: NextPage = () => {
         }}
       >
         <footer>
-          <a href="#" rel="noopener noreferrer">
+          <Link href="#" rel="noopener noreferrer">
             Todos app
-          </a>
+          </Link>
         </footer>
       </Box>
     </Container>
