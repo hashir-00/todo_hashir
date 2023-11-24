@@ -1,11 +1,11 @@
 import Head from "next/head";
 import { useState } from "react";
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from "@mui/icons-material/Home";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"; // for adding the Document to Collection
 import { firestore } from "./utils/firebase"; // firestore instance
 import SvgIcon from "@mui/material/SvgIcon";
+import { Alert, TextareaAutosize } from "../styles/style";
 import {
-  Alert,
   Box,
   Button,
   Container,
@@ -20,13 +20,12 @@ import React from "react";
 import Link from "next/link";
 import router, { Router } from "next/router";
 import { DATABASES } from "./constants/databases";
-import { TextareaAutosize } from "@/styles/style";
 
 const AddTodo = () => {
   const [title, setTitle] = useState<string>(""); // title
   const [description, setDescription] = useState<string>(""); // description
 
-  const [Msg, setMsg] = useState<string>(""); // error
+  const [msg, setMsg] = useState<string>(""); // error
   const [error, setError] = useState<string>(""); // error
   const [colorType, setColorType] = useState<"error" | "success">(); // error
 
@@ -92,12 +91,8 @@ const AddTodo = () => {
   return (
     <Container>
       <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
-        <Alert
-          onClose={handleClose}
-          severity={colorType}
-          sx={{ width: "100%" }}
-        >
-          {Msg}
+        <Alert onClose={handleClose} severity={colorType}>
+          {msg}
         </Alert>
       </Snackbar>
       <Head>
@@ -163,16 +158,13 @@ const AddTodo = () => {
               </Button>
             </Grid>
             <Grid item sm={6} md={8} mt={1}>
-          
               <Button
                 variant="contained"
                 color="secondary"
                 onClick={() => {
                   router.push("/");
                 }}
-                startIcon={
-                 <HomeIcon/>
-                }
+                startIcon={<HomeIcon />}
               >
                 Return Home
               </Button>
