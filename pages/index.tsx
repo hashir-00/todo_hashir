@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { firestore, todosCollection } from "./utils/firebase";
 import {
@@ -20,9 +20,7 @@ import {
   Checkbox,
   Container,
   Grid,
-  Icon,
   Link,
-  ListItem,
   ListItemText,
   Snackbar,
   Stack,
@@ -33,8 +31,7 @@ import * as React from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import router from "next/router";
 import { DATABASES } from "./constants/databases";
-import { Alert, PlusIcon, TextareaAutosize } from "../styles/style";
-import { todo } from "node:test";
+import { Alert, TextareaAutosize } from "../styles/style";
 //mui
 
 //home
@@ -80,8 +77,6 @@ const Home: NextPage = () => {
     setOpen(false);
   };
 
-
-
   //edit todo
   const editTodo = async (documentId: string) => {
     //if empty throw an alert
@@ -100,33 +95,6 @@ const Home: NextPage = () => {
     //set alert color and message
     setColorType("success");
     setMsg("Todo Updated");
-    setDisable(false);
-    setBoxColor(""), setOpen(true);
-    setDid(false);
-
-    await getTodos();
-    //reset the fields
-    setTitle("");
-    setDescription("");
-  };
-
-  const editCompletedTodo = async (documentId: string) => {
-    //if empty throw an alert
-    if (!title || !description) {
-      return (
-        setColorType("error"), setMsg("Please fill all fields"), setOpen(true)
-      );
-    }
-
-    const _todo = doc(firestore, `${DATABASES.TODO}/${documentId}`);
-    // update the doc by updating the fields
-    updateDoc(_todo, {
-      title: title,
-      description: description,
-    });
-    //set alert color and message
-    setColorType("success");
-    setMsg("Completed Todo Updated");
     setDisable(false);
     setBoxColor(""), setOpen(true);
     setDid(false);
@@ -199,18 +167,18 @@ const Home: NextPage = () => {
     setOpen(true);
     await getTodos(), await getCompletedTodos();
   };
-    //update todocompleted
-    const updateTodoCompleted = async (documentId: string) => { // create a pointer to the Document id
-      const _todo = doc(firestore, `${DATABASES.TODO}/${documentId}`);
-      // update the doc by setting done to true
-      await updateDoc(_todo, {
-        done:false,
-      });
-      setMsg("Todo marked as Undone");
-      setOpen(true);
-      await getCompletedTodos(), await getTodos();
-    
-   }
+  //update todocompleted
+  const updateTodoCompleted = async (documentId: string) => {
+    // create a pointer to the Document id
+    const _todo = doc(firestore, `${DATABASES.TODO}/${documentId}`);
+    // update the doc by setting done to true
+    await updateDoc(_todo, {
+      done: false,
+    });
+    setMsg("Todo marked as Undone");
+    setOpen(true);
+    await getCompletedTodos(), await getTodos();
+  };
 
   //delete todo
   const deleteTodo = async (documentId: string) => {
@@ -221,7 +189,6 @@ const Home: NextPage = () => {
     setMsg("Todo deleted");
     // retrieve todos
     await getTodos();
-   
   };
   //delete todo
   const deleteTodoCompleted = async (documentId: string) => {
@@ -232,9 +199,7 @@ const Home: NextPage = () => {
     setMsg("Completed Todo deleted");
     // retrieve todos
     await getCompletedTodos();
-   
   };
-
 
   return (
     <Container sx={{ minHeight: "100vh" }}>
@@ -276,7 +241,7 @@ const Home: NextPage = () => {
           <Button
             sx={{ borderRadius: 3 }}
             variant="contained"
-            endIcon={<AddCircleIcon color="action"/>}
+            endIcon={<AddCircleIcon color="action" />}
             onClick={() => {
               router.push("/addTodo");
             }}
@@ -336,20 +301,25 @@ const Home: NextPage = () => {
           </Stack>
         </Box>
       )}
-      
+
       <Box
         sx={{
           alignItems: "center",
         }}
       >
-        <Typography sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+        <Typography
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
 
-              paddingTop: 10,
-            }} variant="h6" gutterBottom>
-          TODOS</Typography>
+            paddingTop: 10,
+          }}
+          variant="h6"
+          gutterBottom
+        >
+          TODOS
+        </Typography>
         {loading ? (
           <Box
             sx={{
@@ -363,7 +333,6 @@ const Home: NextPage = () => {
             <LoadingButton loading size="large"></LoadingButton>
           </Box>
         ) : (
-          
           todos.map((todo) => {
             return (
               <Grid //container
@@ -380,7 +349,6 @@ const Home: NextPage = () => {
                 }}
                 key={todo.id}
               >
-               
                 <Grid //checkbox
                   item
                   xs={2}
@@ -437,21 +405,24 @@ const Home: NextPage = () => {
               </Grid>
             );
           })
-        
-          
-        )
-        }
+        )}
       </Box>
-      <Box >
-        <Typography sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-           
-              paddingTop: 10,
-            }} variant="h6" gutterBottom>
-          COMPLETED TODOS</Typography>
-         {loading ? (
+      <Box>
+        <Typography
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+
+            paddingTop: 10,
+          }}
+          variant="h6"
+          gutterBottom
+        >
+          COMPLETED TODOS
+        </Typography>
+
+        {loading ? (
           <Box
             sx={{
               display: "flex",
@@ -464,7 +435,6 @@ const Home: NextPage = () => {
             <LoadingButton loading size="large"></LoadingButton>
           </Box>
         ) : (
-          
           todosCompleted.map((todo) => {
             return (
               <Grid //container
@@ -481,14 +451,12 @@ const Home: NextPage = () => {
                 }}
                 key={todo.id}
               >
-               
                 <Grid //checkbox
                   item
                   xs={2}
                   md={2}
                 >
                   <Checkbox
-                    
                     onClick={() => updateTodoCompleted(todo.id)}
                     defaultChecked
                   />
@@ -520,14 +488,11 @@ const Home: NextPage = () => {
                     Delete
                   </Button>
                 </Grid>
-                
               </Grid>
             );
           })
-        
-          
-        )
-        }</Box>
+        )}
+      </Box>
       <Box
         sx={{
           display: "flex",

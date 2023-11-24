@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useState } from "react";
-
+import HomeIcon from '@mui/icons-material/Home';
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"; // for adding the Document to Collection
 import { firestore } from "./utils/firebase"; // firestore instance
 import SvgIcon from "@mui/material/SvgIcon";
@@ -163,7 +163,7 @@ const AddTodo = () => {
               </Button>
             </Grid>
             <Grid item sm={6} md={8} mt={1}>
-              {" "}
+          
               <Button
                 variant="contained"
                 color="secondary"
@@ -171,9 +171,7 @@ const AddTodo = () => {
                   router.push("/");
                 }}
                 startIcon={
-                  <SvgIcon>
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                  </SvgIcon>
+                 <HomeIcon/>
                 }
               >
                 Return Home
