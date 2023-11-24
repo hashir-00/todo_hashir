@@ -21,13 +21,19 @@
         "./*"
       ]
     },
-    "strict": false
+    "strict": false,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "component/TodoList.js"
+    "component/TodoList.js",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
