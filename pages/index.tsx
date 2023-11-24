@@ -1,6 +1,5 @@
 import type { NextPage } from "next";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import LoadingButton from "@mui/lab/LoadingButton";
 import { firestore, todosCollection } from "./utils/firebase";
 import {
   QueryDocumentSnapshot,
@@ -18,9 +17,9 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Container,
   Grid,
-  Link,
   ListItemText,
   Snackbar,
   Stack,
@@ -32,10 +31,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import router from "next/router";
 import { DATABASES } from "./constants/databases";
 import { Alert, TextareaAutosize } from "../styles/style";
-//mui
 
 //home
-
 const Home: NextPage = () => {
   const [todos, setTodos] = useState<QueryDocumentSnapshot<DocumentData>[]>([]); //todos mapping
   const [todosCompleted, setTodosCompleted] = useState<
@@ -46,7 +43,9 @@ const Home: NextPage = () => {
   const [description, setDescription] = useState<string>(""); // description
   const [todoID, setTodoID] = useState<string>(""); // todoID
   const [boxColor, setBoxColor] = useState<string>(""); //box color
-  const [colorType, setColorType] = useState<"error" | "success">(); //snackbar color
+  const [colorType, setColorType] = useState<
+    "error" | "success" | "info" | "warning"
+  >(); //snackbar color
   const [msg, setMsg] = useState<string>(""); //snackbar message
   const [loading, setLoading] = useState<boolean>(true);
   const [disable, setDisable] = useState<boolean>(false);
@@ -107,9 +106,8 @@ const Home: NextPage = () => {
 
   //cancel edit
   const cancelEdit = () => {
-    setMsg("Todo not updated"),
-      setColorType("success"),
-      setDisable(false),
+    setMsg("Todo not updated"), setColorType("warning"), setBoxColor("");
+    setDisable(false),
       setTitle(""),
       setDescription(""),
       setOpen(true),
@@ -330,7 +328,7 @@ const Home: NextPage = () => {
               p: 1,
             }}
           >
-            <LoadingButton loading size="large"></LoadingButton>
+            <CircularProgress color="inherit" />
           </Box>
         ) : (
           todos.map((todo) => {
@@ -432,7 +430,7 @@ const Home: NextPage = () => {
               p: 1,
             }}
           >
-            <LoadingButton loading size="large"></LoadingButton>
+            <CircularProgress color="success" />
           </Box>
         ) : (
           todosCompleted.map((todo) => {
@@ -502,19 +500,13 @@ const Home: NextPage = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          position: "relative",
+          position: "fixed",
 
           borderRadius: 2,
 
           p: 2,
         }}
-      >
-        <footer>
-          <Link href="#" rel="noopener noreferrer">
-            Todos app
-          </Link>
-        </footer>
-      </Box>
+      ></Box>
     </Container>
   );
 };
